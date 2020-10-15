@@ -116,6 +116,9 @@ export const foreignKeysRead = `
     JOIN sys.foreign_keys fk ON fk.object_id = k.constraint_object_id
     JOIN sys.objects ro ON ro.object_id = fk.referenced_object_id
     JOIN sys.objects po ON po.object_id = fk.parent_object_id
+  ORDER BY
+    po.object_id,
+    k.constraint_object_id
 `;
 
 /**
