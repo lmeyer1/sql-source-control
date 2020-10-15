@@ -22,6 +22,7 @@ export interface SqlSchema {
  */
 export interface SqlDataResult {
   name: string;
+  schema: string;
   hasIdentity: number;
   result: sql.IResult<any>;
 }
@@ -63,6 +64,7 @@ export interface SqlColumn {
   seed_value: number;
   increment_value: number;
   formula: string;
+  is_persisted: boolean;
   default_name: string;
 }
 
@@ -108,6 +110,7 @@ export interface SqlIndex {
   column: string;
   schema: string;
   table: string;
+  type: 'CLUSTERED' | 'NONCLUSTERED';
 }
 
 /**

@@ -1,7 +1,7 @@
-import chalk from 'chalk';
+import chalk = require('chalk');
 import * as sql from 'mssql';
 import * as multimatch from 'multimatch';
-import ora from 'ora';
+import ora = require('ora');
 
 import Config from '../common/config';
 import FileUtility from '../common/file-utility';
@@ -17,7 +17,7 @@ import {
   SqlObject,
   SqlPrimaryKey,
   SqlTable,
-  SqlType
+  SqlType,
 } from '../queries/interfaces';
 import {
   columnsRead,
@@ -29,7 +29,7 @@ import {
   objectsRead,
   primaryKeysRead,
   tablesRead,
-  typesRead
+  typesRead,
 } from '../queries/mssql';
 import { PullOptions } from './interfaces';
 
@@ -53,7 +53,7 @@ export default class Pull {
     // connect to db
     new sql.ConnectionPool(conn)
       .connect()
-      .then(pool => {
+      .then((pool) => {
         const queries: any[] = [
           pool.request().query(objectsRead),
           pool.request().query(tablesRead),
@@ -61,23 +61,23 @@ export default class Pull {
           pool.request().query(primaryKeysRead),
           pool.request().query(foreignKeysRead),
           pool.request().query(indexesRead),
-          pool.request().query(typesRead)
+          pool.request().query(typesRead),
         ];
 
         if (config.output.jobs) {
           queries.push(
             pool.request().query(jobsRead(conn.database)),
             pool.request().query(jobStepsRead(conn.database)),
-            pool.request().query(jobSchedulesRead(conn.database))
+            pool.request().query(jobSchedulesRead())
           );
         } else {
           queries.push(null, null, null);
         }
 
         return Promise.all<sql.IResult<any>>(queries)
-          .then(results => {
+          .then((results) => {
             const tables: sql.IRecordSet<SqlTable> = results[1].recordset;
-            const names = tables.map(item => `${item.schema}.${item.name}`);
+            const names = tables.map((item) => `${item.schema}.${item.name}`);
 
             const matched = multimatch(names, config.data);
 
@@ -86,27 +86,30 @@ export default class Pull {
             }
 
             return Promise.all<any>(
-              matched.map(item => {
-                const match = tables.find(table => item === `${table.schema}.${table.name}`);
+              matched.map((item) => {
+                const match = tables.find(
+                  (table) => item === `${table.schema}.${table.name}`
+                );
 
                 return pool
                   .request()
-                  .query(`SELECT * FROM ${item}`)
-                  .then(result => ({
+                  .query(`SELECT * FROM [${match.schema}].[${match.name}]`)
+                  .then((result) => ({
                     hasIdentity: match.identity_count > 0,
-                    name: item,
-                    result
+                    name: match.name,
+                    result,
+                    schema: match.schema,
                   }));
               })
-            ).then(data => [...results, ...data]);
+            ).then((data) => [...results, ...data]);
           })
-          .then(results => {
+          .then((results) => {
             pool.close();
             return results;
           });
       })
-      .then(results => this.writeFiles(config, results))
-      .catch(error => this.spinner.fail(error));
+      .then((results) => this.writeFiles(config, results))
+      .catch((error) => this.spinner.fail(error));
   }
 
   /**
@@ -126,7 +129,9 @@ export default class Pull {
     const types: SqlType[] = results[6].recordset;
     const jobs: SqlJob[] = results[7] ? results[7].recordset : [];
     const jobSteps: SqlJobStep[] = results[8] ? results[8].recordset : [];
-    const jobSchedules: SqlJobSchedule[] = results[9] ? results[9].recordset : [];
+    const jobSchedules: SqlJobSchedule[] = results[9]
+      ? results[9].recordset
+      : [];
     const data: SqlDataResult[] = results.slice(10);
 
     const generator = new MSSQLGenerator(config);
@@ -134,10 +139,10 @@ export default class Pull {
 
     // schemas
     tables
-      .map(item => item.schema)
+      .map((item) => item.schema)
       .filter((value, index, array) => array.indexOf(value) === index)
-      .map(value => ({ name: value }))
-      .forEach(item => {
+      .map((value) => ({ name: value }))
+      .forEach((item) => {
         const name = `${item.name}.sql`;
         const content = generator.schema(item);
 
@@ -146,8 +151,8 @@ export default class Pull {
 
     // stored procedures
     objects
-      .filter(item => item.type.trim() === 'P')
-      .forEach(item => {
+      .filter((item) => item.type.trim() === 'P')
+      .forEach((item) => {
         const name = `${item.schema}.${item.name}.sql`;
         const content = generator.storedProcedure(item);
 
@@ -156,8 +161,8 @@ export default class Pull {
 
     // views
     objects
-      .filter(item => item.type.trim() === 'V')
-      .forEach(item => {
+      .filter((item) => item.type.trim() === 'V')
+      .forEach((item) => {
         const name = `${item.schema}.${item.name}.sql`;
         const content = generator.view(item);
 
@@ -166,8 +171,8 @@ export default class Pull {
 
     // functions
     objects
-      .filter(item => ['TF', 'IF', 'FN'].indexOf(item.type.trim()) !== -1)
-      .forEach(item => {
+      .filter((item) => ['TF', 'IF', 'FN'].indexOf(item.type.trim()) !== -1)
+      .forEach((item) => {
         const name = `${item.schema}.${item.name}.sql`;
         const content = generator.function(item);
 
@@ -176,8 +181,8 @@ export default class Pull {
 
     // triggers
     objects
-      .filter(item => item.type.trim() === 'TR')
-      .forEach(item => {
+      .filter((item) => item.type.trim() === 'TR')
+      .forEach((item) => {
         const name = `${item.schema}.${item.name}.sql`;
         const content = generator.trigger(item);
 
@@ -185,17 +190,23 @@ export default class Pull {
       });
 
     // tables
-    tables.forEach(item => {
+    tables.forEach((item) => {
       const name = `${item.schema}.${item.name}.sql`;
-      const content = generator.table(item, columns, primaryKeys, foreignKeys, indexes);
+      const content = generator.table(
+        item,
+        columns,
+        primaryKeys,
+        foreignKeys,
+        indexes
+      );
 
       file.write(config.output.tables, name, content);
     });
 
     // types
     types
-      .filter(item => !item.type)
-      .forEach(item => {
+      .filter((item) => !item.type)
+      .forEach((item) => {
         const name = `${item.schema}.${item.name}.sql`;
         const content = generator.type(item);
 
@@ -204,8 +215,8 @@ export default class Pull {
 
     // table types
     types
-      .filter(item => item.type && item.type.trim() === 'TT')
-      .forEach(item => {
+      .filter((item) => item.type && item.type.trim() === 'TT')
+      .forEach((item) => {
         const name = `${item.schema}.${item.name}.sql`;
         const content = generator.tableType(item, columns);
 
@@ -213,17 +224,17 @@ export default class Pull {
       });
 
     // data
-    data.forEach(item => {
-      const name = `${item.name}.sql`;
+    data.forEach((item) => {
+      const name = `${item.schema}.${item.name}.sql`;
       const content = generator.data(item);
 
       file.write(config.output.data, name, content);
     });
 
     // jobs
-    jobs.forEach(item => {
-      const steps = jobSteps.filter(x => x.job_id === item.job_id);
-      const schedules = jobSchedules.filter(x => x.job_id === item.job_id);
+    jobs.forEach((item) => {
+      const steps = jobSteps.filter((x) => x.job_id === item.job_id);
+      const schedules = jobSchedules.filter((x) => x.job_id === item.job_id);
       const name = `${item.name}.sql`;
       const content = generator.job(item, steps, schedules);
 
