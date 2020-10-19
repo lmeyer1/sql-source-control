@@ -170,8 +170,9 @@ var MSSQLGenerator = /** @class */ (function () {
             output += os_1.EOL;
             output += os_1.EOL;
         }
-        foreignKeys.forEach(function (fk) {
-            output += _this.foreignKey(fk);
+        var groupedForeignKeys = helpers_1.Helpers.groupByName(foreignKeys, 'name');
+        Object.keys(groupedForeignKeys).forEach(function (name) {
+            output += _this.foreignKey(groupedForeignKeys[name]);
             output += os_1.EOL;
         });
         var groupedIndexes = helpers_1.Helpers.groupByName(indexes, 'name');
@@ -507,21 +508,28 @@ var MSSQLGenerator = /** @class */ (function () {
      *
      * @param item Row from foreignKeys query.
      */
-    MSSQLGenerator.prototype.foreignKey = function (item) {
-        var objectId = "[" + item.schema + "].[" + item.table + "]";
-        var keyObjectId = "[" + item.schema + "].[" + item.name + "]";
-        var parentObjectId = "[" + item.parent_schema + "].[" + item.parent_table + "]";
+    MSSQLGenerator.prototype.foreignKey = function (items) {
+        var first = items[0];
+        var objectId = "[" + first.schema + "].[" + first.table + "]";
+        var keyObjectId = "[" + first.schema + "].[" + first.name + "]";
+        var parentObjectId = "[" + first.parent_schema + "].[" + first.parent_table + "]";
         var output = '';
+        var columns = [];
+        var references = [];
         output += "IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE object_id = OBJECT_ID('" + keyObjectId + "') AND parent_object_id = OBJECT_ID('" + objectId + "'))";
         output += os_1.EOL;
         output += 'BEGIN';
         output += os_1.EOL;
         output +=
             this.indent() +
-                ("ALTER TABLE " + objectId + " WITH " + (item.is_not_trusted ? 'NOCHECK' : 'CHECK'));
-        output += " ADD CONSTRAINT [" + item.name + "] FOREIGN KEY ([" + item.column + "])";
-        output += " REFERENCES " + parentObjectId + " ([" + item.reference + "])";
-        switch (item.delete_referential_action) {
+                ("ALTER TABLE " + objectId + " WITH " + (first.is_not_trusted ? 'NOCHECK' : 'CHECK'));
+        items.forEach(function (item) {
+            columns.push(item.column);
+            references.push(item.reference);
+        });
+        output += " ADD CONSTRAINT [" + first.name + "] FOREIGN KEY ([" + columns.join(', ') + "])";
+        output += " REFERENCES " + parentObjectId + " ([" + references.join(', ') + "])";
+        switch (first.delete_referential_action) {
             case 1:
                 output += ' ON DELETE CASCADE';
                 break;
@@ -532,7 +540,7 @@ var MSSQLGenerator = /** @class */ (function () {
                 output += ' ON DELETE SET DEFAULT';
                 break;
         }
-        switch (item.update_referential_action) {
+        switch (first.update_referential_action) {
             case 1:
                 output += ' ON UPDATE CASCADE';
                 break;
@@ -545,7 +553,8 @@ var MSSQLGenerator = /** @class */ (function () {
         }
         output += os_1.EOL;
         output +=
-            this.indent() + ("ALTER TABLE " + objectId + " CHECK CONSTRAINT [" + item.name + "]");
+            this.indent() +
+                ("ALTER TABLE " + objectId + " CHECK CONSTRAINT [" + first.name + "]");
         output += os_1.EOL;
         output += 'END';
         output += os_1.EOL;
