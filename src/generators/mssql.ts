@@ -543,7 +543,6 @@ export default class MSSQLGenerator {
       if (this.config.includeConstraintName && item.default_name) {
         output += ` CONSTRAINT [${item.default_name}]`;
       }
-
       output += ` DEFAULT${item.definition}`;
     }
 
