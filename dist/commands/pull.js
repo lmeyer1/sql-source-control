@@ -33,7 +33,7 @@ var Pull = /** @class */ (function () {
         var conn = config.getConnection(this.name);
         this.spinner.start("Pulling from " + chalk.blue(conn.server) + " ...");
         // connect to db
-        new sql.ConnectionPool(conn)
+        return new sql.ConnectionPool(conn)
             .connect()
             .then(function (pool) {
             var queries = [
@@ -78,7 +78,9 @@ var Pull = /** @class */ (function () {
             });
         })
             .then(function (results) { return _this.writeFiles(config, results); })
-            .catch(function (error) { return _this.spinner.fail(error); });
+            .catch(function (error) {
+            _this.spinner.fail(error);
+        });
     };
     /**
      * Write all files to the file system based on `results`.

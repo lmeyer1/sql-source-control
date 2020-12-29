@@ -28,7 +28,7 @@ var Init = /** @class */ (function () {
             config_1.default.write({ connections: this.options.webconfig || [conn] });
             return;
         }
-        inquirer
+        return inquirer
             .prompt(this.getQuestions(conn, !!webConfigConns))
             .then(function (answers) { return _this.writeFiles(answers); });
     };

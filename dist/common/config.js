@@ -54,6 +54,10 @@ var Config = /** @class */ (function () {
          * Indicates if constraint names should be scripted.
          */
         this.includeConstraintName = false;
+        /**
+         * Line ending character.
+         */
+        this.eol = 'auto';
         this.load(file);
     }
     /**
@@ -145,7 +149,8 @@ var Config = /** @class */ (function () {
         }
         return Object.assign(conn, {
             options: {
-                encrypt: true,
+                // https://github.com/tediousjs/tedious/releases/tag/v7.0.0
+                enableArithAbort: true,
             },
         });
     };
@@ -180,6 +185,7 @@ var Config = /** @class */ (function () {
             Object.assign(this.idempotency, config.idempotency);
             this.includeConstraintName =
                 config.includeConstraintName || this.includeConstraintName;
+            this.eol = config.eol || this.eol;
         }
         catch (error) {
             console.error('Could not find or parse config file. You can use the `init` command to create one!');

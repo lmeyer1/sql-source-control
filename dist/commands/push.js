@@ -24,7 +24,7 @@ var Push = /** @class */ (function () {
         var _this = this;
         var config = new config_1.default(this.options.config);
         var conn = config.getConnection(this.name);
-        inquirer
+        return inquirer
             .prompt([
             {
                 message: [
@@ -45,8 +45,12 @@ var Push = /** @class */ (function () {
             }
         })
             .then(function () { return _this.batch(config, conn); })
-            .then(function () { return _this.spinner.succeed('Successfully pushed!'); })
-            .catch(function (error) { return _this.spinner.fail(error); });
+            .then(function () {
+            _this.spinner.succeed('Successfully pushed!');
+        })
+            .catch(function (error) {
+            _this.spinner.fail(error);
+        });
     };
     /**
      * Execute all files against database.

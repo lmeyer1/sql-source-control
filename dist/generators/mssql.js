@@ -49,7 +49,7 @@ var MSSQLGenerator = /** @class */ (function () {
         });
         if (item.hasIdentity) {
             output += os_1.EOL;
-            output += "SET IDENTITY_INSERT [" + item.schema + "].[" + item.name + "]\n       OFF";
+            output += "SET IDENTITY_INSERT [" + item.schema + "].[" + item.name + "] OFF";
             output += os_1.EOL;
         }
         output += os_1.EOL;

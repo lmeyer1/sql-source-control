@@ -32,13 +32,16 @@ exports.objectsRead = "\n  SELECT\n    so.name,\n    s.name AS [schema],\n    so
 /**
  * Get SQL information for jobs.
  */
-exports.jobsRead = function (database) { return "\n  SELECT DISTINCT\n    j.job_id,\n    j.name,\n    j.enabled,\n    j.description,\n    j.notify_level_eventlog,\n    j.notify_level_email,\n    j.notify_level_netsend,\n    j.notify_level_page,\n    j.delete_level\n  FROM\n    msdb.dbo.sysjobs j\n    LEFT JOIN msdb.dbo.sysjobsteps s ON s.job_id = j.job_id\n  WHERE\n    s.database_name = '" + database + "'\n  ORDER BY\n    j.name\n"; };
+var jobsRead = function (database) { return "\n  SELECT DISTINCT\n    j.job_id,\n    j.name,\n    j.enabled,\n    j.description,\n    j.notify_level_eventlog,\n    j.notify_level_email,\n    j.notify_level_netsend,\n    j.notify_level_page,\n    j.delete_level\n  FROM\n    msdb.dbo.sysjobs j\n    LEFT JOIN msdb.dbo.sysjobsteps s ON s.job_id = j.job_id\n  WHERE\n    s.database_name = '" + database + "'\n  ORDER BY\n    j.name\n"; };
+exports.jobsRead = jobsRead;
 /**
  * Get SQL information for jobs.
  */
-exports.jobStepsRead = function (database) { return "\n  SELECT\n    s.job_id,\n    j.name as [job_name],\n    s.step_uid,\n    s.step_id AS step_number,\n    s.step_name,\n    s.subsystem,\n    s.command,\n    s.additional_parameters,\n    s.cmdexec_success_code,\n    s.on_success_action,\n    s.on_success_step_id,\n    s.on_fail_action,\n    s.on_fail_step_id,\n    s.database_name,\n    s.database_user_name,\n    s.retry_attempts,\n    s.retry_interval,\n    s.os_run_priority,\n    s.flags\n  FROM\n    msdb.dbo.sysjobsteps s\n    INNER JOIN msdb.dbo.sysjobs j ON j.job_id = s.job_id\n  WHERE\n    s.database_name = '" + database + "'\n  ORDER BY\n    s.job_id,\n    s.step_id\n"; };
+var jobStepsRead = function (database) { return "\n  SELECT\n    s.job_id,\n    j.name as [job_name],\n    s.step_uid,\n    s.step_id AS step_number,\n    s.step_name,\n    s.subsystem,\n    s.command,\n    s.additional_parameters,\n    s.cmdexec_success_code,\n    s.on_success_action,\n    s.on_success_step_id,\n    s.on_fail_action,\n    s.on_fail_step_id,\n    s.database_name,\n    s.database_user_name,\n    s.retry_attempts,\n    s.retry_interval,\n    s.os_run_priority,\n    s.flags\n  FROM\n    msdb.dbo.sysjobsteps s\n    INNER JOIN msdb.dbo.sysjobs j ON j.job_id = s.job_id\n  WHERE\n    s.database_name = '" + database + "'\n  ORDER BY\n    s.job_id,\n    s.step_id\n"; };
+exports.jobStepsRead = jobStepsRead;
 /**
  * Get SQL information for job schedules.
  */
-exports.jobSchedulesRead = function () { return "\n  SELECT\n    s.schedule_uid,\n    s.name AS [schedule_name],\n    s.enabled,\n    s.freq_type,\n    s.freq_interval,\n    s.freq_subday_type,\n    s.freq_subday_interval,\n    s.freq_relative_interval,\n    s.freq_recurrence_factor,\n    s.active_start_date,\n    s.active_end_date,\n    s.active_start_time,\n    s.active_end_time,\n    js.job_id\n  FROM\n    msdb.dbo.sysschedules s\n    INNER JOIN msdb.dbo.sysjobschedules js ON js.schedule_id = s.schedule_id\n  ORDER BY\n    s.name\n"; };
+var jobSchedulesRead = function () { return "\n  SELECT\n    s.schedule_uid,\n    s.name AS [schedule_name],\n    s.enabled,\n    s.freq_type,\n    s.freq_interval,\n    s.freq_subday_type,\n    s.freq_subday_interval,\n    s.freq_relative_interval,\n    s.freq_recurrence_factor,\n    s.active_start_date,\n    s.active_end_date,\n    s.active_start_time,\n    s.active_end_time,\n    js.job_id\n  FROM\n    msdb.dbo.sysschedules s\n    INNER JOIN msdb.dbo.sysjobschedules js ON js.schedule_id = s.schedule_id\n  ORDER BY\n    s.name\n"; };
+exports.jobSchedulesRead = jobSchedulesRead;
 //# sourceMappingURL=mssql.js.map

@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var chalk = require("chalk");
 var checksum = require("checksum");
+var eol = require("eol");
 var filenamify = require("filenamify");
 var fs = require("fs-extra");
 var glob = require("glob");
@@ -43,6 +44,18 @@ var FileUtility = /** @class */ (function () {
             return;
         }
         file = path.join(this.config.getRoot(), dir, file);
+        switch (this.config.eol) {
+            case 'crlf':
+                content = eol.crlf(content);
+                break;
+            case 'lf':
+                content = eol.lf(content);
+                break;
+            case 'auto':
+            default:
+                content = eol.auto(content);
+                break;
+        }
         content = content.trim();
         var cacheKey = this.normalize(file);
         var cacheValue = checksum(content);

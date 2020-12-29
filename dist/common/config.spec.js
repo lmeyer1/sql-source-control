@@ -24,6 +24,9 @@ describe('Config class', function () {
     beforeEach(function () {
         mock.restore();
     });
+    afterAll(function () {
+        mock.restore();
+    });
     describe('getRoot method', function () {
         it('should return default root path', function () {
             var _a;
