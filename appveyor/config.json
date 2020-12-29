@@ -1,7 +1,7 @@
 {
   "connections": [
     {
-      "name": "test",
+      "name": "appveyor",
       "server": "APPVYR-WIN\\SQL2017",
       "port": 1433,
       "database": "AdventureWorks2017",

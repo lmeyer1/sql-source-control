@@ -1,5 +1,5 @@
 [![NPM Version](https://badge.fury.io/js/sql-source-control.svg)](https://badge.fury.io/js/sql-source-control)
-[![Build Status](https://travis-ci.org/justinlettau/sql-source-control.svg?branch=master)](https://travis-ci.org/justinlettau/sql-source-control)
+[![CI](https://github.com/justinlettau/sql-source-control/workflows/CI/badge.svg)](https://github.com/justinlettau/sql-source-control/actions)
 [![Build status](https://ci.appveyor.com/api/projects/status/a92idr95kkly8lgt/branch/master?svg=true)](https://ci.appveyor.com/project/justinlettau/sql-source-control/branch/master)
 [![Dependency Status](https://david-dm.org/justinlettau/sql-source-control.svg)](https://david-dm.org/justinlettau/sql-source-control)
 [![Dev Dependency Status](https://david-dm.org/justinlettau/sql-source-control/dev-status.svg)](https://david-dm.org/justinlettau/sql-source-control?type=dev)
@@ -201,6 +201,10 @@ following properties are supported.
 
 **includeConstraintName** (`boolean`): Optional. Indicates if constraint names should be scripted. Default is `false`.
 
+**eol** (`string`): Optional. Line ending character (`auto`, `crlf`, or `lf`). Default is `auto`.
+
+Note: See [Git documentation](https://git-scm.com/book/en/v2/Customizing-Git-Git-Configuration#_formatting_and_whitespace) for information about how Git handles line endings.
+
 # Examples
 
 ### Connections
@@ -360,4 +364,13 @@ Clone the repo and run the following commands in the `sql-source-control` direct
 npm install
 npm link
 npm run build
+```
+
+To use local docker container:
+
+```bash
+npm run docker:up
+./docker/restore.ps1
+
+ssc pull -c ./docker/config.json
 ```

@@ -5,7 +5,7 @@
 .vscode
 
 # Other
-.nyc_output/
+*.bak
 coverage/
 _sql-database/
 node_modules/
